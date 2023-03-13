@@ -10,7 +10,7 @@ from Evaluator import Evaluator
 
 
 def train_experiment(experiment):
-
+    # Retrieval of the experiments' parameters.
     Model = experiment['model']
     model_str = experiment['model_str']
     mag_factor = experiment.get('mag_factor', 10)
@@ -24,7 +24,8 @@ def train_experiment(experiment):
     image_size = experiment.get('image_size', (256,256))
     batch_size = experiment.get('batch_size', 16)
     validation_size = experiment.get('validation_size', 0.2)
-
+    
+    # File paths creation
     data = "mag" + str(mag_factor) + "_" + str(image_size[0]) + "_" + str(image_size[1])
     data_folder_name = data
     if overlap_data==True:
@@ -36,32 +37,28 @@ def train_experiment(experiment):
     else:
         name_model = data + '_no_augmentation' + '_lr' + str(lr) + '_eps' + str(eps) + '_e' + str(max_epochs) + '_pat' + str(patience)
 
-    clf_name = os.path.join(os.getcwd(), "models",  model_str + name_model) #"lighter_"+
+    clf_name = os.path.join(os.getcwd(), "models",  model_str + name_model)
 
     path_to_dataset = os.path.join(os.path.dirname(os.getcwd()), "DataThesis", data_folder_name)
     path_to_test_set = os.path.join(os.path.dirname(os.getcwd()), "DataThesis", "test_set")
-    #path_to_predictions = os.path.join(os.path.dirname(os.getcwd()), "DataThesis", "predictions", os.path.basename(clf_name))
-    #os.makedirs(path_to_predictions, exist_ok=True)  # Creates the folder for the predictions. If it already exists, overwrites it
-
+    
     print("Path to dataset provided: ", path_to_dataset)
     print("Path to test set provided: ", path_to_test_set)
-    #print("Path to predictions provided: ", path_to_predictions)
     print("clf name provided:   ", clf_name)
 
-    #Tensorboard
+    #Tensorboard (to visualize the results of the experiment)
     log_dir = os.path.join(os.getcwd(), "tensorboard", os.path.basename(clf_name) +"_"+ datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
     tf.keras.backend.clear_session()
 
     # Training
+    
+    # Since we are dealing with huge amounts of data, a data generator is used
     print("about to enter data generator")
     generator = DataGenerator_v2(batch_size, validation_size, image_size, path_to_dataset, data_augmentation, overlap_data)
     print("generator ready")
 
-    print("about to enter model")
     model = Model(image_size, clf_name, lr=lr, eps=eps)
-
-
 
     print("about to enter history (model.fit())")
     history = model.fit(max_epochs, generator, tensorboard_callback, patience=patience)
@@ -105,15 +102,6 @@ def train_experiment(experiment):
                              'iou': history.history['val_iou'][i_bm], 'matthews_correlation': history.history['val_matthews_correlation'][i_bm]}
     print(metrics["validation"])
 
-    """ 
-    print("Test metrics")
-    test_metrics= Evaluator.predict_WSI_and_evaluate_BASIC(model, path_to_test_set, path_to_predictions, image_size, mag_factor=mag_factor, overlap=overlap_pred)
-    metrics["test"] = {'accuracy': test_metrics[0], 'precision': test_metrics[1], 'specificity': test_metrics[2],
-                       'recall': test_metrics[3], 'f1': test_metrics[4], 'iou': test_metrics[5], 'matthews_correlation': test_metrics[6]}
-    print(metrics["test"])
-    np.save(f"{clf_name}_metrics.npy", metrics, allow_pickle=True)
-    """
-
 
     with open(f"{clf_name}_metrics.txt", 'w') as fp:
         print("Number of pos tiles available: ", len(generator.pos_val) + len(generator.pos_train), file=fp)
@@ -132,12 +120,6 @@ def train_experiment(experiment):
               metrics["validation"]["specificity"], metrics["validation"]["recall"], metrics["training"]["f1"],
               metrics["training"]["iou"], metrics["validation"]["matthews_correlation"], file=fp)
         
-        #print(" ---- ", file=fp)
-        #print("Test perfomance:", file=fp)
-        #print("Accuracy\tPrecision\tSpecificity\tRecall\tf1\tiou\tMCC", file=fp)
-        #print(metrics["test"]["accuracy"], metrics["test"]["precision"],
-        #      metrics["test"]["specificity"], metrics["test"]["recall"], metrics["test"]["f1"],
-        #      metrics["test"]["iou"], metrics["test"]["matthews_correlation"],file=fp)
 
 def main():
 
