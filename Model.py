@@ -83,11 +83,8 @@ class Model():
             self.model.compile(
                 optimizer=opt,
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-                #loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-                #tf.keras.losses.SparseCategoricalCrossentropy(name='crossentropy'),'accuracy'
                 metrics=[tf.keras.losses.SparseCategoricalCrossentropy(name='crossentropy'), 'accuracy', precision, specificity, recall, f1, iou, matthews_correlation], #tf.keras.losses.BinaryCrossentropy(name='crossentropy'),tf.keras.metrics.BinaryAccuracy(name = 'accuracy'),tf.keras.metrics.Precision(name = 'precision'), tf.keras.metrics.BinaryIoU(target_class_ids=[0, 1], threshold=0.5, name='IoU'), tf.keras.metrics.Precision(name = 'precision'), tf.keras.metrics.Recall(name = 'recall'),tfa.metrics.MatthewsCorrelationCoefficient(num_classes=2)
                 run_eagerly=True)
-            #, precision, specificity, recall, f1, matthews_correlation
         else:
             self.model = tf.keras.models.load_model(loadFrom, compile=False, custom_objects={'leaky_relu': tf.nn.leaky_relu})
 
@@ -112,21 +109,18 @@ class Model():
                      tf.keras.callbacks.EarlyStopping(monitor='val_crossentropy', patience=patience), #val_crossentropy
                      tensorboard_callback] #modif pour apres faire un generateur sur validation_data
 
-        #dataset.next_balanced_batch(n_epochs)
         print("about to enter into return self.model.fit()")
         return self.model.fit(
-            dataset.next_balanced_batch_BASIC(n_epochs),#dataset.next_batch(n_epochs),
+            dataset.next_balanced_batch_BASIC(n_epochs),
             epochs=n_epochs,
             steps_per_epoch=dataset.batches_per_epoch,
-            validation_data=dataset.get_validation_data_BASIC(), #prev v3
-            validation_steps= dataset.nb_tiles_val//dataset.batch_size,  # prev (with v2) dataset.validation_size//dataset.batch_size,
+            validation_data=dataset.get_validation_data_BASIC(),
+            validation_steps= dataset.nb_tiles_val//dataset.batch_size,
             callbacks=callbacks
             )
 
 
     def predict(self, data):
-        #print("entered in Model.predict()")
-
         return self.model.predict(data)
 
     @staticmethod
