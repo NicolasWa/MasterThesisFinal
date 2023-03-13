@@ -1,4 +1,3 @@
-# NEW VERSION
 from matplotlib import pyplot as plt
 import numpy as np
 import math
@@ -66,13 +65,6 @@ class DataGenerator_v2():
         self.data_augmentation = data_augmentation
         self.overlap_data = overlap_data
 
-        # pos_val & neg_val are balanced, pos_train & neg_train are not balanced yet
-        """
-        self.pos_val, self.neg_val, self.pos_train, self.neg_train = get_training_validation_sets_BASIC(self.path_to_dataset, self.validation_size)
-        self.nb_tiles_val = len(self.pos_val) + len(self.neg_val)
-        self.nb_tiles_train_per_class = np.min([len(self.pos_train), len(self.neg_train)])
-        self.nb_tiles_train_balanced = 2 * self.nb_tiles_train_per_class
-        """
         self.pos_train, self.neg_train, self.pos_val, self.neg_val = get_training_validation_sets_BASIC(self.path_to_dataset, self.overlap_data)
         self.nb_tiles_val = len(self.pos_val) + len(self.neg_val)
         self.nb_tiles_train_per_class = np.min([len(self.pos_train), len(self.neg_train)])
@@ -108,12 +100,9 @@ class DataGenerator_v2():
 
                 batch_x[index_in_batch] = tile_rgb_pos
                 batch_x[index_in_batch + 1] = tile_rgb_neg
-                # print("tile_rgb_pos.shape -> ", tile_rgb_pos.shape)
-                # print("tile_rgb_neg.shape -> ", tile_rgb_neg.shape)
                 batch_y[index_in_batch] = tile_mask_pos
                 batch_y[index_in_batch + 1] = tile_mask_neg
-                # print("tile_mask_pos.shape -> ", tile_mask_pos.shape)
-                # print("tile_mask_neg.shape -> ", tile_mask_neg.shape)
+
                 index_in_batch += 2
 
                 if index_in_batch >= self.batch_size:
@@ -200,13 +189,6 @@ def test_access_tiles():
     mask = load_annot(pairs_pos[0][1])
     print(mask)
     print(mask.shape)
-
-    # print(" pairs_pos length: ", len(pairs_pos))
-    # print("------------ \n ----------- \n --------")
-    # print("pairs_neg length: ", len(pairs_neg))
-    # balanced_training_validation_sets_BASIC(pairs_pos, pairs_neg, 0.2)
-    # ----- directly work with pairs_pos and pairs_neg to extract the right amount of data
-
 
 if __name__ == '__main__':
     test_access_tiles()
