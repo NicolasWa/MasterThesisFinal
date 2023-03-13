@@ -1,7 +1,10 @@
+"""" The raw data consists of .ndpi whose slide images are too voluminous to be handled with DL models. 
+This functions aims at preparing the data and transform it into tiles while keeping track of 
+where they came from (image and coordinates on the image)""""
+
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-#from skimage.io import imread, imshow
 from skimage.color import rgb2hsv, rgb2gray
 from skimage.filters import threshold_otsu
 from skimage.morphology import opening, closing, disk
@@ -11,6 +14,8 @@ import sys
 import pickle
 import data_extraction
 from utils import *
+
+
 def get_coord_valid_tiles_BASIC(annot_img, tissue_mask, min_tissue_area, tile_size, overlap):
     counter_valid_tiles = 0
     if overlap==False:
