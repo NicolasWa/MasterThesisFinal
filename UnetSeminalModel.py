@@ -22,7 +22,7 @@ def upsample_block(x, conv_features, n_filters):
     # upsample
     print("entre dans upsample block")
     #
-    x = tf.keras.layers.Conv2DTranspose(n_filters, 3, 2, padding="same")(x) #peut etre foireux. remplacer ca par interpolation + convolution (moins de risque que ca pose des soucis)
+    x = tf.keras.layers.Conv2DTranspose(n_filters, 3, 2, padding="same")(x)
     # concatenate
     x = tf.keras.layers.concatenate([x, conv_features])
     #x = tf.keras.layers.Dropout(0.1)(x)
@@ -39,10 +39,10 @@ class UnetSeminalModel(Model):
 
 
     def set_model(self):
-        n_filters = 64 #16
+        n_filters = 64
         inputs = tf.keras.Input(shape=self.image_size+(3,))
+        
         x1, p1 = downsample_block(inputs, n_filters)
-        #print("au revoir")
         x2, p2 = downsample_block(p1, n_filters*2)
         x3, p3 = downsample_block(p2, n_filters*4)
         x4, p4 = downsample_block(p3, n_filters*8)
@@ -51,7 +51,7 @@ class UnetSeminalModel(Model):
         u3 = upsample_block(u4, x3, n_filters*4)
         u2 = upsample_block(u3, x2, n_filters*2)
         u1 = upsample_block(u2, x1, n_filters)
+        
         outputs = tf.keras.layers.Conv2D(2, 1, activation=tf.nn.softmax, padding='same', kernel_initializer="he_normal")(u1) #2,1 #added padding same recently
-        #ajouter arg max
         self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
         self.model.summary()
